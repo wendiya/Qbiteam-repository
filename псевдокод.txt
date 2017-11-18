@@ -41,13 +41,16 @@ class Player
 // Игровой процесс
 Game()
 {
-	Player1Points = 0;
-	Player2Points = 0;
+	player1
+	player2
 	
-	while (Player1Points < POINTS_TO_WIN && Player2Points < POINTS_TO_WIN)
-		(Player1Points, Player2Points) = Round(Player1Points, Player2Points)
+	player1.points = 0;
+	player2.points = 0;
 	
-	if (Player1Points > Player2Points)
+	while (player1.points < POINTS_TO_WIN && player2.points < POINTS_TO_WIN)
+		Round(player1, player2)
+	
+	if (player1.points > player2.points)
 		// побеждает 1 игрок
 	else
 		// побеждает 2 игрок
@@ -56,19 +59,19 @@ Game()
 
 
 // Один раунд
-Round(Player1Points, Player2Points)
+Round(player1, player2)
 {
 	deck[DECK_SIZE] = {card1, card2, ...}
 	for (i = DECK_SIZE - 1, ..., 1)
-		deck.swap(i, rand[0,i])										// перемешивание колоды
+		deck.swap(i, rand[0,i])								// перемешивание колоды
 	
-	player1.GetHand(deck[0:NEW_HAND_DRAW-1])						// раздача карт первому игроку
-	player1.DiscardCards(NEW_HAND_DISCARD)							// сброс лишних карт
+	player1.GetHand(deck[0:NEW_HAND_DRAW-1])				// раздача карт первому игроку
+	player1.DiscardCards(NEW_HAND_DISCARD)					// сброс лишних карт
 	
-	player2.GetHand(deck[NEW_HAND_DRAW:2*NEW_HAND_DRAW-1])			// раздача карт второму игроку
-	player2.DiscardCards(NEW_HAND_DISCARD)							// сброс лишних карт
+	player2.GetHand(deck[NEW_HAND_DRAW:2*NEW_HAND_DRAW-1])	// раздача карт второму игроку
+	player2.DiscardCards(NEW_HAND_DISCARD)					// сброс лишних карт
 	
-	topcard = 2*START_HAND_SIZE // верхушка колоды
+	topcard = 2*START_HAND_SIZE 							// верхушка колоды
 	RoundEnds = False
 	
 	while(not RoundEnds)
@@ -83,65 +86,62 @@ Round(Player1Points, Player2Points)
 			{
 			case ATTACK:
 				winner = Battle(player1.hand, player2.hand)
-				if (winner == 0) continue
-				if (winner == 1) Player1Points += POINTS_FOR_WINNING_IN_BATTLE
-				if (winner == 2) Player2Points += POINTS_FOR_WINNING_IN_BATTLE
+				if (winner == 1) player1.points += POINTS_FOR_WINNING_IN_BATTLE
+				if (winner == 2) player2.points += POINTS_FOR_WINNING_IN_BATTLE
 				RoundEnds = true
-				continue
+				break
 			case DEFENCE:
 				winner = Defence(player2.hand, player1.hand)
-				if (winner == 0) continue
-				if (winner == 1) Player2Points += POINTS_FOR_SUCCESSFUL_DEFENCE
-				if (winner == 2) Player1Points += POINTS_FOR_SUCCESSFUL_ATTACK
+				if (winner == 1) player2.points += POINTS_FOR_SUCCESSFUL_DEFENCE
+				if (winner == 2) player1.points += POINTS_FOR_SUCCESSFUL_ATTACK
 				RoundEnds = true
-				continue
+				break
 			case CARD:
-				Player1Points += POINTS_FOR_KILLING
+				player1.points += POINTS_FOR_KILLING
 				RoundEnds = true
-				continue
+				break
 			}
+			break
 		case DEFENCE:
 			switch(action2)
 			{
 			case ATTACK:
 				winner = Defence(player1.hand, player2.hand)
-				if (winner == 0) continue
-				if (winner == 1) Player1Points += POINTS_FOR_SUCCESSFUL_DEFENCE
-				if (winner == 2) Player2Points += POINTS_FOR_SUCCESSFUL_ATTACK
+				if (winner == 1) player1.points += POINTS_FOR_SUCCESSFUL_DEFENCE
+				if (winner == 2) player2.points += POINTS_FOR_SUCCESSFUL_ATTACK
 				RoundEnds = true
-				continue
+				break
 			case DEFENCE:
-				continue
+				break
 			case CARD:
 				if topcard < n
 					player2.hand.append(deck[topcard])
 					topcard += 1
-				continue
+				break
 			}
+			break
 		case CARD:
 			switch(action2)
 			{
 			case ATTACK:
-				Player2Points += POINTS_FOR_KILLING
+				player2.points += POINTS_FOR_KILLING
 				RoundEnds = true
-				continue
+				break
 			case DEFENCE:
 				if topcard < n
 					player1.hand.append(deck[topcard])
 					topcard += 1
-				continue
+				break
 			case CARD:
-				if topcard < n
+				if topcard < n - 1
 					player1.hand.append(deck[topcard])
 					topcard += 1
-				if topcard < n
 					player2.hand.append(deck[topcard])
 					topcard += 1
-				continue
+				break
 			}
 		}
 	}
-	return (Player1Points, Player2Points)
 }
 
 
