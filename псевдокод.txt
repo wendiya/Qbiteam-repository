@@ -1,3 +1,8 @@
+################
+###  SERVER  ###
+################
+
+
 POINTS_FOR_WINNING_IN_BATTLE = 2 
 POINTS_FOR_SUCCESSFUL_DEFENCE = 1
 POINTS_FOR_SUCCESSFUL_ATTACK = 3
@@ -48,7 +53,10 @@ Game()
 	player2.points = 0;
 	
 	while (player1.points < POINTS_TO_WIN && player2.points < POINTS_TO_WIN)
+	{
 		Round(player1, player2)
+		SendRoundResult(player1, player2)
+	}
 	
 	if (player1.points > player2.points)
 		// побеждает 1 игрок
@@ -141,6 +149,8 @@ Round(player1, player2)
 				break
 			}
 		}
+		
+		SendStepResult(RoundEnds, player1, player2)
 	}
 }
 
@@ -184,4 +194,71 @@ GetPower(hand)
 	for card in hand:
 		power += card.attack + (FractionSizes[card.fraction] - 1) * card.bonus
 	return power
+}
+
+SendRoundResult(player1, player2)
+{
+	if player1.points >= POINTS_TO_WIN
+		// Send player1 WIN
+		// Send player2 LOSE
+	else if player2.points >= POINTS_TO_WIN
+		// Send player1 LOSE
+		// Send player2 WIN
+	else
+		// Send player1 GAME_CONTINUES
+		// Send player2 GAME_CONTINUES
+}
+
+SendStepResult(RoundEnds, player1, player2)
+{
+	if RoundEnds
+		// Send player1 ROUND_ENDS
+		// Send player2 ROUND_ENDS
+	else
+		// Send player1 ROUND_CONTINUES
+		// Send player2 ROUND_CONTINUES
+}
+
+
+
+################
+###  CLIENT  ###
+################
+
+Game()
+{
+	// Some code here
+	
+	GameEnds = false
+	
+	while(not GameEnds)
+	{
+		PlayRound()
+		result = GetResult()
+		if result == WIN:
+		{
+			// WIN!!!
+			GameEnds = true
+		}
+		if result == LOSE:
+		{
+			// LOSE!!!
+			GameEnds = true
+		}
+	}
+}
+
+PlayRound()
+{
+	hand = GetHand()
+	hand = DiscardCards()
+	
+	RoundEnds = false
+	
+	while(not RoundEnds)
+	{
+		SendAction()
+		if GetStepResult() == ROUND_ENDS
+			RoundEnds = true
+	}
 }
