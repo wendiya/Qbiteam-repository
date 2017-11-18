@@ -1,0 +1,187 @@
+POINTS_FOR_WINNING_IN_BATTLE = 2 
+POINTS_FOR_SUCCESSFUL_DEFENCE = 1
+POINTS_FOR_SUCCESSFUL_ATTACK = 3
+POINTS_FOR_KILLING = 1 // Переименовать?
+
+FRACTIONS_COUNT = 3
+DECK_SIZE = 18
+NEW_HAND_DRAW = 5
+NEW_HAND_DISCARD = 2
+
+POINTS_TO_WIN = 10
+
+
+
+// Игрок
+class Player
+{
+	hand[]
+	
+	GetHand(a[])
+	{
+		hand = a
+		// Отправить игроку руку
+	}
+	
+	DiscardCards(CardsToDiscard)
+	{
+		// Игрок выбирает CardsToDiscard карт для сброса
+		// Выбранные карты удаляются из hand
+	}
+	
+	GetAction()
+	{
+		// Считать действие игрока и передать на выход функции
+	}
+}
+
+
+
+
+// Игровой процесс
+Game()
+{
+	Player1Points = 0;
+	Player2Points = 0;
+	
+	while (Player1Points < POINTS_TO_WIN && Player2Points < POINTS_TO_WIN)
+		(Player1Points, Player2Points) = Round(Player1Points, Player2Points)
+	
+	if (Player1Points > Player2Points)
+		// побеждает 1 игрок
+	else
+		// побеждает 2 игрок
+}
+
+
+
+// Один раунд
+Round(Player1Points, Player2Points)
+{
+	deck[DECK_SIZE] = {card1, card2, ...}
+	for (i = DECK_SIZE - 1, ..., 1)
+		deck.swap(i, rand[0,i])										// перемешивание колоды
+	
+	player1.GetHand(deck[0:NEW_HAND_DRAW-1])						// раздача карт первому игроку
+	player1.DiscardCards(NEW_HAND_DISCARD)							// сброс лишних карт
+	
+	player2.GetHand(deck[NEW_HAND_DRAW:2*NEW_HAND_DRAW-1])			// раздача карт второму игроку
+	player2.DiscardCards(NEW_HAND_DISCARD)							// сброс лишних карт
+	
+	topcard = 2*START_HAND_SIZE // верхушка колоды
+	RoundEnds = False
+	
+	while(not RoundEnds)
+	{
+		action1 = player1.GetAction()
+		action2 = player2.GetAction()
+	
+		switch(action1)
+		{
+		case ATTACK:
+			switch(action2)
+			{
+			case ATTACK:
+				winner = Battle(player1.hand, player2.hand)
+				if (winner == 0) continue
+				if (winner == 1) Player1Points += POINTS_FOR_WINNING_IN_BATTLE
+				if (winner == 2) Player2Points += POINTS_FOR_WINNING_IN_BATTLE
+				RoundEnds = true
+				continue
+			case DEFENCE:
+				winner = Defence(player2.hand, player1.hand)
+				if (winner == 0) continue
+				if (winner == 1) Player2Points += POINTS_FOR_SUCCESSFUL_DEFENCE
+				if (winner == 2) Player1Points += POINTS_FOR_SUCCESSFUL_ATTACK
+				RoundEnds = true
+				continue
+			case CARD:
+				Player1Points += POINTS_FOR_KILLING
+				RoundEnds = true
+				continue
+			}
+		case DEFENCE:
+			switch(action2)
+			{
+			case ATTACK:
+				winner = Defence(player1.hand, player2.hand)
+				if (winner == 0) continue
+				if (winner == 1) Player1Points += POINTS_FOR_SUCCESSFUL_DEFENCE
+				if (winner == 2) Player2Points += POINTS_FOR_SUCCESSFUL_ATTACK
+				RoundEnds = true
+				continue
+			case DEFENCE:
+				continue
+			case CARD:
+				if topcard < n
+					player2.hand.append(deck[topcard])
+					topcard += 1
+				continue
+			}
+		case CARD:
+			switch(action2)
+			{
+			case ATTACK:
+				Player2Points += POINTS_FOR_KILLING
+				RoundEnds = true
+				continue
+			case DEFENCE:
+				if topcard < n
+					player1.hand.append(deck[topcard])
+					topcard += 1
+				continue
+			case CARD:
+				if topcard < n
+					player1.hand.append(deck[topcard])
+					topcard += 1
+				if topcard < n
+					player2.hand.append(deck[topcard])
+					topcard += 1
+				continue
+			}
+		}
+	}
+	return (Player1Points, Player2Points)
+}
+
+
+
+// Битва
+Battle(hand1, hand2)
+{
+	power1 = GetPower(hand1)
+	power2 = GetPower(hand2)
+	
+	if (power1 > power2) return 1
+	if (power2 > power1) return 2
+	return 0
+}
+
+Defence(hand1, hand2)
+{
+	power1 = GetPower(hand1) + DEFENCE_BONUS
+	power2 = GetPower(hand2)
+	
+	if (power1 > power2) return 1
+	if (power2 > power1) return 2
+	return 0	
+}
+
+// Считаем количества героев каждой фракции в руке
+GetFractionsSizes(hand)
+{
+	FractionsSizes = [0, ..., 0] // по количеству фракций
+	for card in hand:
+		FractionsSizes[card.fraction] += 1
+	return FractionsSizes
+}
+
+// Считаем силу руки
+GetPower(hand)
+{
+	FractionsSizes = GetFractionsSizes(hand)
+	power = 0
+	for card in hand:
+		power += card.attack + (FractionSizes[card.fraction] - 1) * card.bonus
+	return power
+}
